@@ -1,6 +1,5 @@
 import os
 import pymysql
-import pandas as pd
 import s3fs
 
 '''
@@ -35,25 +34,17 @@ def get_s3_csv_file(plate_name):
     return None
 
 
-def parse_csv_file(file_path):
-    with fs.open(file_path, "r") as file:
-        for line in file:
-            if line.strip():
-                # Process non-blank line
-                pass
-
-
-def main():
-    db_host = 'lims.c2kct5xnoka4.us-east-1.rds.amazonaws.com'
-    db_user = 'jdavis'
-    db_password = 'DU;6tsb$;BFc>)'
-    db_name = 'lims'
+def get_scanner_dict():
+    DB_HOST = 'lims.c2kct5xnoka4.us-east-1.rds.amazonaws.com'
+    DB_NAME = 'lims'
+    DB_USER = os.environ.get('DB_USER')
+    DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
     connection = pymysql.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        db=db_name,
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
     )
 
     scanners, scanner_ids = get_plate_names_with_scanning_value_one(connection)
@@ -64,13 +55,12 @@ def main():
         csv_file = get_s3_csv_file(plate_name)
         if csv_file:
             scanner['csv_path'] = csv_file
-            parse_csv_file(csv_file)
             scanner_dict[f"scanner_{scanner_id}"] = scanner
 
     connection.close()
-
     print(scanner_dict)
+    return scanner_dict
 
 
 if __name__ == "__main__":
-    main()
+    get_scanner_dict()
