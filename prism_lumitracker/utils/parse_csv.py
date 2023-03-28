@@ -129,9 +129,8 @@ def count_csv_rows(s3_uri):
     return count
 
 
-def parse_csv(csv_path, out_path):
+def parse_csv(csv_path):
     csv_path = csv_path
-    out_path = out_path
     print('Reading ' + csv_path + '...')
     start_line, end_line = get_start_end_rows(csv_path)
     med_df = make_df(csv_path, start=start_line, end=end_line, metric="Median")
@@ -140,7 +139,3 @@ def parse_csv(csv_path, out_path):
     cnt_df = make_long_table(cnt_df, "Count")
     res = med_df.merge(cnt_df, on=['pert_well', 'analyte_id'], how='outer')
     return res
-
-
-parse_csv('s3://lumitracker.clue.io/9191985.L4_P7/9191985.L4_P7.jcsv',
-          '~/Desktop')

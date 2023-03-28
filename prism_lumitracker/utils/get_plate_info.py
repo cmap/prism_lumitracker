@@ -12,6 +12,13 @@ John Davis
 '''
 
 fs = s3fs.S3FileSystem(anon=False)
+DB_HOST = 'lims.c2kct5xnoka4.us-east-1.rds.amazonaws.com'
+DB_NAME = 'lims'
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
+API_URL = 'https://api.clue.io/api/'
+API_KEY = os.environ['API_KEY']
+BUILDS_URL = API_URL + 'data_build_types/prism-builds'
 
 
 def get_plate_names_with_scanning_value_one(connection):
@@ -35,11 +42,6 @@ def get_s3_csv_file(plate_name):
 
 
 def get_scanner_dict():
-    DB_HOST = 'lims.c2kct5xnoka4.us-east-1.rds.amazonaws.com'
-    DB_NAME = 'lims'
-    DB_USER = os.environ.get('DB_USER')
-    DB_PASSWORD = os.environ.get('DB_PASSWORD')
-
     connection = pymysql.connect(
         host=DB_HOST,
         user=DB_USER,
@@ -59,7 +61,3 @@ def get_scanner_dict():
 
     connection.close()
     return scanner_dict
-
-
-if __name__ == "__main__":
-    get_scanner_dict()
