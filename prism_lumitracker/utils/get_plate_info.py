@@ -58,7 +58,6 @@ def get_scanner_dict():
             scanner_dict[f"scanner_{scanner_id}"] = scanner
 
     connection.close()
-    print(scanner_dict)
     return scanner_dict
 
 
