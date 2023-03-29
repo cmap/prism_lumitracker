@@ -138,4 +138,5 @@ def parse_csv(csv_path):
     med_df = make_long_table(med_df, "Median")
     cnt_df = make_long_table(cnt_df, "Count")
     res = med_df.merge(cnt_df, on=['pert_well', 'analyte_id'], how='outer')
+    res.fillna(0, inplace=True)
     return res

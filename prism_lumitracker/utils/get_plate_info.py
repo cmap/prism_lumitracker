@@ -23,10 +23,15 @@ BUILDS_URL = API_URL + 'data_build_types/prism-builds'
 
 def get_plate_names_with_scanning_value_one(connection):
     with connection.cursor() as cursor:
-        query = "SELECT newest_plate, scanner_id FROM scanner WHERE is_active = 1"
+        query = """
+        SELECT scanner.newest_plate, scanner.scanner_id, plate.det_plate
+        FROM scanner
+        JOIN plate ON plate.det_plate = scanner.newest_plate
+        WHERE scanner.is_active = 1
+        """
         cursor.execute(query)
         result = cursor.fetchall()
-        scanners = [{'plate': row[0], 'csv_path': None} for row in result]
+        scanners = [{'plate': row[0], 'csv_path': None, 'det_plate': row[2]} for row in result]
     return scanners, [row[1] for row in result]
 
 
