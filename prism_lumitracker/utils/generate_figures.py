@@ -28,20 +28,33 @@ def upload_plot_to_s3(bucket_name, prefix, plot, plot_filename):
     print(f"Uploaded plot '{plot_filename}' to '{s3_key}' in bucket '{bucket_name}'.")
 
 
-def generate_cal_curve(df, ctl_analytes, det_name, canonical_name = None):
+def generate_cal_curve(df, ctl_analytes, det_name, canonical_name=None):
     # Group the data by a categorical variable
-    grouped = df[df.analyte_id.isin(ctl_analytes)].groupby('pert_well')
+    data = df[(df.analyte_id.isin(ctl_analytes))&(df['count'] != -666)]
+
+    # Set hue column to use if it exists
+    hue_col = 'pert_type'
+    order = ['trt_poscon','ctl_vehicle']
 
     # Create a new plot and plot each group separately
     plt.figure()
-    for name, group in grouped:
-        sns.lineplot(data=group,
+    if hue_col in df.columns:
+        sns.lineplot(data=data,
                      x='analyte_id',
                      y='logMFI',
-                     label=name,
-                     legend=False)
+                     hue=hue_col,
+                     legend=True,
+                     ci=False,
+                     hue_order=order)
+    else:
+        sns.lineplot(data=data,
+                     x='analyte_id',
+                     y='logMFI',
+                     legend=False,
+                     ci=False)
     plt.xticks(rotation=45)
-    plt.ylim(4, 16)
+    min_ylim = 6
+    plt.ylim(min_ylim, plt.ylim()[1])
 
     if canonical_name:
         plt.title(canonical_name + ' control analytes')
@@ -62,9 +75,6 @@ def generate_cal_curve(df, ctl_analytes, det_name, canonical_name = None):
     plt.close(current_figure)
 
 
-    # plt.savefig(os.path.join(output_dir, plate_name, 'cal.png'))
-
-
 def make_matrix_df(df, metric):
     grouped = df.groupby(['pert_well']).median().reset_index()
     grouped['row'] = grouped['pert_well'].str[0]
@@ -77,7 +87,7 @@ def make_matrix_df(df, metric):
     return matrix
 
 
-def generate_lmfi_heatmap(df, ctl_analytes, det_name, canonical_name = None):
+def generate_lmfi_heatmap(df, ctl_analytes, det_name, canonical_name=None):
     """
     Generates a heatmap of the logMFI values for a plate.
 
@@ -117,14 +127,13 @@ def generate_lmfi_heatmap(df, ctl_analytes, det_name, canonical_name = None):
     plt.close(current_figure)
 
     # Save the heatmap to a file
-    #plt.savefig(os.path.join(output_dir, det_name, 'lmfi.png'))
+    # plt.savefig(os.path.join(output_dir, det_name, 'lmfi.png'))
 
     # Close the plot to free up memory
     plt.close()
 
 
-
-def generate_count_heatmap(df, ctl_analytes, det_name, canonical_name = None):
+def generate_count_heatmap(df, ctl_analytes, det_name, canonical_name=None):
     """
     Generates a heatmap of the count values for a plate.
 
@@ -164,8 +173,7 @@ def generate_count_heatmap(df, ctl_analytes, det_name, canonical_name = None):
     plt.close(current_figure)
 
     # Save the heatmap to a file
-    #plt.savefig(os.path.join(output_dir, plate_name, 'count.png'))
+    # plt.savefig(os.path.join(output_dir, plate_name, 'count.png'))
 
     # Close the plot to free up memory
     plt.close()
-

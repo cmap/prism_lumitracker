@@ -1,6 +1,10 @@
-import os
 import pymysql
 import s3fs
+import requests
+import os
+import pandas as pd
+from urllib.parse import quote
+
 
 '''
 Uses the lims database to look up currently scanning plates
@@ -21,17 +25,40 @@ API_KEY = os.environ['API_KEY']
 BUILDS_URL = API_URL + 'data_build_types/prism-builds'
 
 
+def get_plate_map_df(pert_plate, replicate):
+    base_url = "https://api.clue.io/api/v_plate_map_src"
+    api_key = os.environ.get("API_KEY")
+
+    filter_param = f'{{"where": {{"pert_plate": "{pert_plate}", "replicate": "{replicate}"}}}}'
+    encoded_filter_param = quote(filter_param)
+    request_url = f"{base_url}?filter={encoded_filter_param}"
+
+    headers = {
+        "Accept": "application/json",
+        "user_key": api_key
+    }
+
+    response = requests.get(request_url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        df = pd.DataFrame(data)
+        return df
+    else:
+        raise Exception(f"Request failed with status code {response.status_code}")
+
+
 def get_plate_names_with_scanning_value_one(connection):
     with connection.cursor() as cursor:
         query = """
-        SELECT scanner.newest_plate, scanner.scanner_id, plate.det_plate, plate.brew_prefix, plate.replicate, plate.bead_batch_id
+        SELECT scanner.newest_plate, scanner.scanner_id, plate.det_plate, plate.pert_plate, plate.cell_id, plate.pert_time, plate.replicate, plate.bead_batch_id
         FROM scanner
         JOIN plate ON plate.det_plate = scanner.newest_plate
         WHERE scanner.is_active = 1
         """
         cursor.execute(query)
         result = cursor.fetchall()
-        scanners = [{'plate': row[0], 'csv_path': None, 'det_plate': row[2], 'prefix': row[3], 'replicate': row[4], 'beadset': row[5]} for row in result]
+        scanners = [{'plate': row[0], 'csv_path': None, 'det_plate': row[2], 'pert_plate': row[3], 'cell_id': row[4], 'pert_time': row[5], 'replicate': row[6], 'beadset': row[7]} for row in result]
     return scanners, [row[1] for row in result]
 
 

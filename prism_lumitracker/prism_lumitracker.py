@@ -1,8 +1,8 @@
-import os.path
 import boto3
 import utils.parse_csv as parse_csv
 import utils.get_plate_info as get_plate_info
 import utils.generate_figures as generate_figures
+
 
 # Generate dictionary of plate names, jcsv paths and scanners
 plate_dict = get_plate_info.get_scanner_dict()
@@ -17,32 +17,36 @@ bucket_name = 'lumitracker.clue.io'
 s3 = boto3.client('s3')
 
 for scanner in plate_dict:
-    df = parse_csv.parse_csv(plate_dict[scanner]['csv_path'])
+    # Read in jcsv file
+    path = plate_dict[scanner]['csv_path']
+    df = parse_csv.parse_csv(path)
+    df = df[df['count'] != 0]
+    pert_plate = plate_dict[scanner]['pert_plate']
+    replicate = plate_dict[scanner]['replicate']
+    df['pert_plate'] = pert_plate
+    df['replicate'] = replicate
 
+    df.to_csv(f"~/Desktop/{pert_plate}_{replicate}.csv")
+
+
+    # Get plate map if applicable
+    print(f"Looking for plate map for {pert_plate}_{replicate}...")
+    plate_map = get_plate_info.get_plate_map_df(pert_plate, replicate)
+    if plate_map.shape[0] > 0:
+        df = df.merge(plate_map,
+                      on=['pert_plate', 'replicate','pert_well'],
+                      how='left')
+
+    df.to_csv(f"~/Desktop/{pert_plate}_{replicate}_merged.csv")
+    # Get scanning plate name
     plate = plate_dict[scanner]['plate']
-
     det_plate = plate_dict[scanner]['det_plate']
 
-    if plate_dict[scanner].get('prefix') is not None:
-        canonical_plate = f"{plate_dict[scanner]['prefix']}_{plate_dict[scanner]['replicate']}_{plate_dict[scanner]['beadset']}"
+    # Get canonical name if it exists
+    if plate_dict[scanner].get('pert_plate') is not None:
+        canonical_plate = f"{plate_dict[scanner]['pert_plate']}_{plate_dict[scanner]['cell_id']}_{plate_dict[scanner]['pert_time']}_{plate_dict[scanner]['replicate']}_{plate_dict[scanner]['beadset']}"
     else:
         canonical_plate = None
-
-    if not os.path.exists("/Users/jdavis/Desktop/" + plate):
-        os.mkdir("/Users/jdavis/Desktop/" + plate)
-
-    # Check if the prefix exists
-    # directory_exists = True
-    # try:
-    #    s3.head_object(Bucket=bucket_name, Key=directory_path)
-    # except:
-    #    directory_exists = False
-
-    # Print the result
-    # if directory_exists:
-    #    print(f"Directory '{directory_path}' exists in bucket '{bucket_name}'")
-    # else:
-    #    print(f"Directory '{directory_path}' does not exist in bucket '{bucket_name}'")
 
     generate_figures.generate_cal_curve(df,
                                         ctl_analytes,

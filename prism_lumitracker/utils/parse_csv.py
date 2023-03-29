@@ -69,8 +69,7 @@ def make_df(s3_uri, start, end, metric):
 
     # Convert numeric columns to float data type
     numeric_cols = [col for col in df.columns if col != 'Location']
-    df[numeric_cols] = df[numeric_cols].replace('', np.nan).astype(float).fillna(0)
-
+    df[numeric_cols] = df[numeric_cols].replace('', np.nan).astype(float).fillna(-666)
     return df
 
 
