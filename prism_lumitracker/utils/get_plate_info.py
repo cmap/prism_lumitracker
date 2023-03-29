@@ -5,7 +5,6 @@ import os
 import pandas as pd
 from urllib.parse import quote
 
-
 '''
 Uses the lims database to look up currently scanning plates
 and returns a dictionary of scanner dictionaries containing
@@ -58,7 +57,8 @@ def get_plate_names_with_scanning_value_one(connection):
         """
         cursor.execute(query)
         result = cursor.fetchall()
-        scanners = [{'plate': row[0], 'csv_path': None, 'det_plate': row[2], 'pert_plate': row[3], 'cell_id': row[4], 'pert_time': row[5], 'replicate': row[6], 'beadset': row[7]} for row in result]
+        scanners = [{'plate': row[0], 'csv_path': None, 'det_plate': row[2], 'pert_plate': row[3], 'cell_id': row[4],
+                     'pert_time': row[5], 'replicate': row[6], 'beadset': row[7]} for row in result]
     return scanners, [row[1] for row in result]
 
 

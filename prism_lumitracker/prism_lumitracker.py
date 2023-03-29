@@ -26,9 +26,6 @@ for scanner in plate_dict:
     df['pert_plate'] = pert_plate
     df['replicate'] = replicate
 
-    df.to_csv(f"~/Desktop/{pert_plate}_{replicate}.csv")
-
-
     # Get plate map if applicable
     print(f"Looking for plate map for {pert_plate}_{replicate}...")
     plate_map = get_plate_info.get_plate_map_df(pert_plate, replicate)
@@ -37,7 +34,6 @@ for scanner in plate_dict:
                       on=['pert_plate', 'replicate','pert_well'],
                       how='left')
 
-    df.to_csv(f"~/Desktop/{pert_plate}_{replicate}_merged.csv")
     # Get scanning plate name
     plate = plate_dict[scanner]['plate']
     det_plate = plate_dict[scanner]['det_plate']
