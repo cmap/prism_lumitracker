@@ -16,7 +16,6 @@ bucket_name = 'lumitracker.clue.io'
 # Create a connection to the S3 service
 s3 = boto3.client('s3')
 
-
 for scanner in plate_dict:
     df = parse_csv.parse_csv(plate_dict[scanner]['csv_path'])
 
@@ -24,37 +23,38 @@ for scanner in plate_dict:
 
     det_plate = plate_dict[scanner]['det_plate']
 
-    df.to_csv('/Users/jdavis/Desktop/test_df.csv')
+    if plate_dict[scanner].get('prefix') is not None:
+        canonical_plate = f"{plate_dict[scanner]['prefix']}_{plate_dict[scanner]['replicate']}_{plate_dict[scanner]['beadset']}"
+    else:
+        canonical_plate = None
 
     if not os.path.exists("/Users/jdavis/Desktop/" + plate):
         os.mkdir("/Users/jdavis/Desktop/" + plate)
 
-
     # Check if the prefix exists
-    #directory_exists = True
-    #try:
+    # directory_exists = True
+    # try:
     #    s3.head_object(Bucket=bucket_name, Key=directory_path)
-    #except:
+    # except:
     #    directory_exists = False
 
     # Print the result
-    #if directory_exists:
+    # if directory_exists:
     #    print(f"Directory '{directory_path}' exists in bucket '{bucket_name}'")
-    #else:
+    # else:
     #    print(f"Directory '{directory_path}' does not exist in bucket '{bucket_name}'")
 
     generate_figures.generate_cal_curve(df,
                                         ctl_analytes,
-                                        plate_name = det_plate,
-                                        output_dir = "/Users/jdavis/Desktop/")
-
+                                        det_name=det_plate,
+                                        canonical_name=canonical_plate)
 
     generate_figures.generate_lmfi_heatmap(df,
-                                            ctl_analytes,
-                                            plate_name=det_plate,
-                                            output_dir="/Users/jdavis/Desktop/")
+                                           ctl_analytes,
+                                           det_name=det_plate,
+                                           canonical_name=canonical_plate)
 
     generate_figures.generate_count_heatmap(df,
                                             ctl_analytes,
-                                            plate_name=det_plate,
-                                            output_dir="/Users/jdavis/Desktop/")
+                                            det_name=det_plate,
+                                            canonical_name=canonical_plate)
