@@ -30,11 +30,11 @@ def upload_plot_to_s3(bucket_name, prefix, plot, plot_filename):
 
 def generate_cal_curve(df, ctl_analytes, det_name, canonical_name=None):
     # Group the data by a categorical variable
-    data = df[(df.analyte_id.isin(ctl_analytes))&(df['count'] != -666)]
+    data = df[(df.analyte_id.isin(ctl_analytes)) & (df['count'] != -666)]
 
     # Set hue column to use if it exists
     hue_col = 'pert_type'
-    order = ['trt_poscon','ctl_vehicle']
+    order = ['trt_poscon', 'ctl_vehicle']
 
     # Create a new plot and plot each group separately
     plt.figure()
@@ -177,3 +177,35 @@ def generate_count_heatmap(df, ctl_analytes, det_name, canonical_name=None):
 
     # Close the plot to free up memory
     plt.close()
+
+
+def generate_box_plots(df, ctl_analytes, det_name, canonical_name=None, pert_type='clt_vehicle'):
+    # Filter the data to remove control beads and yet to be scanned wells, subset to pert_type
+    data = df[(~df.analyte_id.isin(ctl_analytes)) & (df['count'] != -666) & (df.pert_type == pert_type)]
+
+    # Create a new plot and plot each group separately
+    plt.figure()
+    sns.boxplot(data=data,
+                 x='pert_well',
+                 y='logMFI',
+                color='dodgerblue',
+                fliersize=0)
+    plt.xticks(rotation=45)
+    plt.ylim(6, 16)
+    if canonical_name:
+        plt.title(f"{canonical_name} {pert_type} logMFI")
+    else:
+        plt.title(f"{det_name} {pert_type} logMFI")
+
+    # Get the current figure
+    current_figure = plt.gcf()
+
+    # Set the filename
+    filename = 'quantiles_raw.png'
+
+    upload_plot_to_s3(bucket_name=bucket,
+                      prefix=det_name,
+                      plot=current_figure,
+                      plot_filename=filename)
+
+    plt.close(current_figure)

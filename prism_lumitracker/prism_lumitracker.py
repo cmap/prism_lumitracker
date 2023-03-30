@@ -58,3 +58,9 @@ for scanner in plate_dict:
                                             ctl_analytes,
                                             det_name=det_plate,
                                             canonical_name=canonical_plate)
+
+    generate_figures.generate_box_plots(df,
+                                        ctl_analytes,
+                                        det_name=det_plate,
+                                        canonical_name=canonical_plate,
+                                        pert_type='ctl_vehicle')
