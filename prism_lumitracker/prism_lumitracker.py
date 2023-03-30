@@ -17,6 +17,8 @@ bucket_name = 'lumitracker.clue.io'
 s3 = boto3.client('s3')
 
 for scanner in plate_dict:
+    if not plate_dict[scanner]['csv_path']:
+        break
     # Read in jcsv file
     path = plate_dict[scanner]['csv_path']
     df = parse_csv.parse_csv(path)
@@ -59,8 +61,9 @@ for scanner in plate_dict:
                                             det_name=det_plate,
                                             canonical_name=canonical_plate)
 
-    generate_figures.generate_box_plots(df,
-                                        ctl_analytes,
-                                        det_name=det_plate,
-                                        canonical_name=canonical_plate,
-                                        pert_type='ctl_vehicle')
+    if 'pert_type' in df.columns:
+        generate_figures.generate_box_plots(df,
+                                            ctl_analytes,
+                                            det_name=det_plate,
+                                            canonical_name=canonical_plate,
+                                            pert_type=['ctl_vehicle','ctl_untrt'])

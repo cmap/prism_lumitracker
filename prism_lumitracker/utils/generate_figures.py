@@ -34,12 +34,13 @@ def generate_cal_curve(df, ctl_analytes, det_name, canonical_name=None):
 
     # Set hue column to use if it exists
     hue_col = 'pert_type'
-    order = ['trt_poscon', 'ctl_vehicle']
 
     # Create a new plot and plot each group separately
     plt.figure()
-    if hue_col in df.columns:
-        sns.lineplot(data=data,
+    if hue_col in data.columns:
+        filtered = data[~data.pert_type.isna()]
+        order = sorted(list(filtered['pert_type'].unique()))
+        sns.lineplot(data=filtered,
                      x='analyte_id',
                      y='logMFI',
                      hue=hue_col,
@@ -181,7 +182,7 @@ def generate_count_heatmap(df, ctl_analytes, det_name, canonical_name=None):
 
 def generate_box_plots(df, ctl_analytes, det_name, canonical_name=None, pert_type='clt_vehicle'):
     # Filter the data to remove control beads and yet to be scanned wells, subset to pert_type
-    data = df[(~df.analyte_id.isin(ctl_analytes)) & (df['count'] != -666) & (df.pert_type == pert_type)]
+    data = df[(~df.analyte_id.isin(ctl_analytes)) & (df['count'] != -666) & (df.pert_type.isin(pert_type))]
 
     # Create a new plot and plot each group separately
     plt.figure()
