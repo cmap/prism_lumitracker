@@ -66,7 +66,7 @@ def generate_cal_curve(df, ctl_analytes, det_name, canonical_name=None):
     current_figure = plt.gcf()
 
     # Set the filename
-    filename = 'calibplot.png'
+    filename = 'prism_calibplot.png'
 
     upload_plot_to_s3(bucket_name=bucket,
                       prefix=det_name,
@@ -118,7 +118,7 @@ def generate_lmfi_heatmap(df, ctl_analytes, det_name, canonical_name=None):
     current_figure = plt.gcf()
 
     # Set the filename
-    filename = 'qc_level10.png'
+    filename = 'prism_logmfi_heatmap.png'
 
     upload_plot_to_s3(bucket_name=bucket,
                       prefix=det_name,
@@ -164,7 +164,7 @@ def generate_count_heatmap(df, ctl_analytes, det_name, canonical_name=None):
     current_figure = plt.gcf()
 
     # Set the filename
-    filename = 'plate_count.png'
+    filename = 'prism_plate_count.png'
 
     upload_plot_to_s3(bucket_name=bucket,
                       prefix=det_name,
@@ -202,7 +202,7 @@ def generate_box_plots(df, ctl_analytes, det_name, canonical_name=None, pert_typ
     current_figure = plt.gcf()
 
     # Set the filename
-    filename = 'quantiles_raw.png'
+    filename = 'prism_vehicle_box.png'
 
     upload_plot_to_s3(bucket_name=bucket,
                       prefix=det_name,
@@ -210,3 +210,6 @@ def generate_box_plots(df, ctl_analytes, det_name, canonical_name=None, pert_typ
                       plot_filename=filename)
 
     plt.close(current_figure)
+
+    def generate_control_bc_plot(df, ctl_analytes, det_name, canonical_name=None):
+        print('test')
