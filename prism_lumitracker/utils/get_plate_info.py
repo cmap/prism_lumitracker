@@ -20,7 +20,7 @@ DB_NAME = 'lims'
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 API_URL = 'https://api.clue.io/api/'
-API_KEY = os.environ['API_KEY']
+API_KEY = os.environ.get('API_KEY')
 BUILDS_URL = API_URL + 'data_build_types/prism-builds'
 
 
@@ -59,6 +59,11 @@ def get_plate_names_with_scanning_value_one(connection):
         result = cursor.fetchall()
         scanners = [{'plate': row[0], 'csv_path': None, 'det_plate': row[2], 'pert_plate': row[3], 'cell_id': row[4],
                      'pert_time': row[5], 'replicate': row[6], 'beadset': row[7]} for row in result]
+        if scanners:
+            print(f"Found {len(scanners)} active scanners")
+            print(f"Scanning plates: {[scanner['plate'] for scanner in scanners]}")
+        else:
+            print("No active scanners found")
     return scanners, [row[1] for row in result]
 
 
